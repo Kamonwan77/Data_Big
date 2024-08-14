@@ -5,7 +5,7 @@ spark  = SparkSession \
     .builder \
     .getOrCreate()
 
-rdd = spark.sparkContext.textFile('fb_live_thailand.csv', 5)
+rdd = spark.sparkContext.textFile('C:\\Users\\gamon\\Documents\\Data\\Data_Big\\4-Low-Level_Spark\\fb_live_thailand.csv', 5)
 print("Number of partitions: " + str(rdd.getNumPartitions()))
 
 count_distinct = rdd.distinct().count()

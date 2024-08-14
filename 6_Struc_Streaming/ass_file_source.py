@@ -14,7 +14,7 @@ schema = StructType([
 lines = spark.readStream.format("csv") \
     .option("maxFilesPerTrigger", 1) \
     .option("header", True) \
-    .option("path", "C:\\Users\\gamon\\Documents\\Data\\Data_Big\\Struc_Streaming\\file_source") \
+    .option("path", "C:\\Users\\gamon\\Documents\\Data\\Data_Big\\6_Struc_Streaming\\file_source") \
     .schema(schema) \
     .load()
 

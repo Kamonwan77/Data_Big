@@ -4,16 +4,16 @@ from pyspark.sql.types import IntegerType
 
 spark = SparkSession.builder.appName("AggregationFunctions").getOrCreate()
 
-df1 = spark.read.csv('fb_live_thailand2.csv', header=True, inferSchema=True)
-df2 = spark.read.csv('fb_live_thailand3.csv', header=True, inferSchema=True)
+df1 = spark.read.csv('C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand2.csv', header=True, inferSchema=True)
+df2 = spark.read.csv('C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand3.csv', header=True, inferSchema=True)
 
 read_file = spark.read.format("csv") \
     .option("header", "true") \
-    .load("fb_live_thailand.csv")
+    .load("C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand.csv")
 
 read_file = spark.read.format("csv") \
     .option("header", "true") \
-    .load("fb_live_thailand.csv")
+    .load("C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand.csv")
 
 read_file.printSchema()
 
@@ -57,11 +57,11 @@ sqlDF.select(avg("num_reactions_int")).show()
 # 23-28
 sqlDF1 = spark.read.format("csv") \
     .option("header", "true") \
-    .load("fb_live_thailand2.csv")
+    .load("C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand2.csv")
 
 sqlDF2 = spark.read.format("csv") \
     .option("header", "true") \
-    .load("fb_live_thailand3.csv")
+    .load("C:\\Users\\gamon\\Documents\\Data\\Data_Big\\2_Hadoop\\fb_live_thailand3.csv")
 
 
 inner_join_df = sqlDF1.join(sqlDF2, sqlDF1["status_id"] == sqlDF2["status_id"], "inner")

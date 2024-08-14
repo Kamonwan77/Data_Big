@@ -24,17 +24,23 @@ file_schema = StructType([
     StructField("num_angrys", StringType(), True)
 ])
 
-# อ่านข้อมูลจาก File (โดยใช้การอ่านไฟล์ที่เพิ่มขึ้น พร้อมกับการใช้ Schema ที่กำหนด)
+# อ่านข้อมูลจากไฟล์ (ใช้การอ่านไฟล์ที่เพิ่มขึ้น พร้อมกับการใช้ Schema ที่กำหนด)
 lines = spark.readStream \
     .format("csv") \
     .option("header", "true") \
     .option("maxFilesPerTrigger", 1) \
-    .option("path", "C:/Users/gamon/Documents/Data/Data_Big/stream") \
+    .option("path", "C:\\Users\\gamon\\Documents\\Data\\Data_Big\\7-Streaming_Source\stream") \
     .schema(file_schema) \
     .load()
 
-# พิมพ์ schema ของ DataFrame
+# พิมพ์ schema ของ DataFrame เพื่อยืนยันการอ่านข้อมูล
 lines.printSchema()
+
+# แสดงข้อมูลบางส่วนจาก DataFrame เพื่อยืนยันการอ่านข้อมูล
+lines.writeStream \
+    .format("console") \
+    .start() \
+    .awaitTermination(10)  # รอการพิมพ์ข้อมูล 10 วินาที แล้วหยุดการทำงาน
 
 # การจัดการคอลัมน์และการตั้งค่า watermark
 words = lines.withColumn("date", split(col("status_published"), " ").getItem(1)) \
@@ -44,46 +50,15 @@ words = lines.withColumn("date", split(col("status_published"), " ").getItem(1))
 # นับจำนวนคำ
 wordCounts = words.groupBy("date", "status_type", "timestamp").count()
 
-# เขียนผลลัพธ์ไปยังไฟล์ CSV
+# เขียนผลลัพธ์ไปยังไฟล์ CSV (ใช้ append mode แทน complete mode)
 query = wordCounts.writeStream \
     .format("csv") \
-    .option("path", "C:/Users/gamon/Documents/Data/Data_Big/savetofile") \
+    .option("path", "C:\\Users\\gamon\\Documents\\Data\\Data_Big\\7-Streaming_Source\\savetofile\\checkpoint") \
     .trigger(processingTime='5 seconds') \
-    .option("checkpointLocation", "C:/Users/gamon/Documents/Data/Data_Big/savetofile/checkpoint") \
+    .option("checkpointLocation", "C:\\Users\\gamon\\Documents\\Data\\Data_Big\\7-Streaming_Source\\savetofile\\checkpoint") \
     .outputMode("append") \
     .option("truncate", "false") \
     .start()
 
 # รอให้กระบวนการ streaming ทำงาน
 query.awaitTermination()
-
-# อ่านข้อมูลจาก Socket
-socket_stream_df = spark.readStream \
-    .format("socket") \
-    .option("host", "localhost") \
-    .option("port", 9999) \
-    .load() \
-    .selectExpr("value as message")
-
-# อ่านข้อมูลจาก Kafka
-kafka_stream_df = spark.readStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", "localhost:9092") \
-    .option("subscribe", "topic_name") \
-    .load() \
-    .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-
-# การเขียนผลลัพธ์จาก Socket และ Kafka ไปยัง Console
-query_socket = socket_stream_df.writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .start()
-
-query_kafka = kafka_stream_df.writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .start()
-
-# รอให้กระบวนการ streaming ทำงาน
-query_socket.awaitTermination()
-query_kafka.awaitTermination()
