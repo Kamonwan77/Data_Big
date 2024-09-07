@@ -2,7 +2,6 @@ from mrjob.job import MRJob
 
 class  MapReduceRight(MRJob):
     def mapper(self, _, line):
-
         if 'status_id' not in line:
 
             data = line.split(',')
@@ -12,7 +11,6 @@ class  MapReduceRight(MRJob):
             yield fbID, data
 
     def reducer(self , key , values):
-
         fb2 = []
         fb3 = []
         for i in values:

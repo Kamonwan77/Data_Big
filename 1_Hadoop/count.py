@@ -4,9 +4,7 @@ class MapReduceCount(MRJob):
     def mapper(self, _, line):
         data = line.split(',')
         status_type = data[1].strip()
-        
-       
-
+    
     def reducer(self, key, value):
         yield key, sum(value)
 

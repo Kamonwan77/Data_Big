@@ -17,8 +17,6 @@ class MapReduceDistinct(MRJob):
 
     def reducer(self, key,values):
         yield key,None        
-
-
    
 if __name__ == '__main__':
     MapReduceDistinct.run()

@@ -16,10 +16,5 @@ class  MapReduceBinning(MRJob):
             if year == '2018' :
                 yield status_type , data 
 
-#def reducer(self, key,values):
-    #yield status_typr , data  
-
-
-   
 if __name__ == '__main__':
     MapReduceBinning.run()
