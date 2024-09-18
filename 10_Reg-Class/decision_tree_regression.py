@@ -1,78 +1,41 @@
+# 1. Import libraries
 from pyspark.sql import SparkSession
 from pyspark.ml.feature import StringIndexer, VectorAssembler, OneHotEncoder
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml import Pipeline
 
-# Create SparkSession
 spark = SparkSession.builder \
-    .appName("Decision Tree Regression Analysis") \
+    .appName("DecisionTreeRegressionExample") \
     .getOrCreate()
 
-# Load data file into DataFrame
-data = spark.read.csv('C:\\Users\\gamon\\Documents\\Data\\Data_Big\\10-Reg-Class\\fb_live_thailand.csv', header=True, inferSchema=True)
-data.show()
+data = spark.read.csv("C:\\Users\\ADMIN\\Documents\\Data_Big\\10_Reg-Class\\fb_live_thailand.csv", header=True, inferSchema=True)
 
-# Use StringIndexer to create indexes for 'num_reactions' and 'num_loves'
-indexer_reactions = StringIndexer(inputCol='num_reactions', outputCol='num_reactions_ind')
-indexer_loves = StringIndexer(inputCol='num_loves', outputCol='num_loves_ind')
+indexer_reactions = StringIndexer(inputCol="num_reactions", outputCol="num_reactions_ind")
+indexer_loves = StringIndexer(inputCol="num_loves", outputCol="num_loves_ind")
 
-# Fit and transform the data with StringIndexer
-data_indexed = indexer_reactions.fit(data).transform(data)
-data_indexed = indexer_loves.fit(data_indexed).transform(data_indexed)
+encoder_reactions = OneHotEncoder(inputCols=["num_reactions_ind"], outputCols=["num_reactions_vec"])
+encoder_loves = OneHotEncoder(inputCols=["num_loves_ind"], outputCols=["num_loves_vec"])
 
-# Use OneHotEncoder to create Boolean flags
-encoder = OneHotEncoder(
-    inputCols=['num_reactions_ind', 'num_loves_ind'],
-    outputCols=['num_reactions_vec', 'num_loves_vec']
-)
+assembler = VectorAssembler(inputCols=["num_reactions_vec", "num_loves_vec"], outputCol="features")
 
-# Use VectorAssembler to create vector of encoded columns
-assembler = VectorAssembler(
-    inputCols=['num_reactions_vec', 'num_loves_vec'],
-    outputCol='features'
-)
+pipeline = Pipeline(stages=[indexer_reactions, indexer_loves, encoder_reactions, encoder_loves, assembler])
 
-# Create a pipeline with stages: indexer, encoder, and assembler
-pipeline = Pipeline(stages=[indexer_reactions, indexer_loves, encoder, assembler])
+pipeline_model = pipeline.fit(data)
 
-# Fit the DataFrame into the pipeline to create the pipeline model
-pipeline_model = pipeline.fit(data_indexed)
+transformed_data = pipeline_model.transform(data)
 
-# Use the pipeline model to transform the DataFrame data resulting in another DataFrame
-data_transformed = pipeline_model.transform(data_indexed)
+train_data, test_data = transformed_data.randomSplit([0.8, 0.2])
 
-# Create train and test datasets using randomSplit
-train_data, test_data = data_transformed.randomSplit([0.8, 0.2], seed=42)
+dt = DecisionTreeRegressor(labelCol="num_loves_ind", featuresCol="features")
 
-# Create Decision Tree Regressor model
-decision_tree_regressor = DecisionTreeRegressor(
-    labelCol='num_loves_ind',  # Label column for the regression
-    featuresCol='features'    # Features column for the regression
-)
+dt_model = dt.fit(train_data)
 
-# Add Decision Tree Regressor to the pipeline
-pipeline_with_regressor = Pipeline(stages=[indexer_reactions, indexer_loves, encoder, assembler, decision_tree_regressor])
+predictions = dt_model.transform(test_data)
 
-# Fit the train data into the created pipeline to create the model
-pipeline_model_with_regressor = pipeline_with_regressor.fit(train_data)
+evaluator = RegressionEvaluator(labelCol="num_loves_ind", predictionCol="prediction")
 
-# Use the created model to transform the test data resulting in predictions
-predictions = pipeline_model_with_regressor.transform(test_data)
-
-# Show 5 rows of the predictions DataFrame
-predictions.select('num_loves_ind', 'features', 'prediction').show(5)
-
-# Create RegressionEvaluator
-evaluator = RegressionEvaluator(
-    labelCol='num_loves_ind',  # Label column for the regression
-    predictionCol='prediction'  # Prediction column
-)
-
-# Calculate and show Mean Squared Error (MSE)
-mse = evaluator.setMetricName("mse").evaluate(predictions)
-print(f"Mean Squared Error (MSE): {mse:.4f}")
-
-# Calculate and show R2
 r2 = evaluator.setMetricName("r2").evaluate(predictions)
-print(f"R2: {r2:.4f}")
+print(f"R2 score: {r2}")
+
+spark.stop()
