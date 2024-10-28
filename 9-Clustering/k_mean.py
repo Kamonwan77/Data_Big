@@ -22,7 +22,7 @@ spark = SparkSession \
 # load function is used to load data file into dataframe
 df = spark.read.format("csv"). \
     option("header", True). \
-    load("data/fb_live_thailand.csv")
+    load("C:\\Users\\gamon\\Documents\\Data\Data_Big\\9-Clustering\\fb_live_thailand.csv")
 
 # Convert data to Double
 df = df.select(df.num_sads.cast(DoubleType()), 
@@ -84,6 +84,7 @@ evaluator = ClusteringEvaluator(predictionCol = "prediction_col",
 
 silhouette = evaluator.evaluate(predictions)
 print("Silhouette with squared euclidean distance = " + str(silhouette))
+
 
 # Converting to Pandas DataFrame
 clustered_data_pd = predictions.toPandas()

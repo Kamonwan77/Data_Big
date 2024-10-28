@@ -11,7 +11,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # Load data file into DataFrame
-data = spark.read.csv('C:\\Users\\ADMIN\\Documents\\Data_Big\\10_Reg-Class\\fb_live_thailand.csv', header=True, inferSchema=True)
+data = spark.read.csv('fb_live_thailand.csv', header=True, inferSchema=True)
 data.show()
 
 # Use StringIndexer to create indexes for 'status_type' and 'status_published'

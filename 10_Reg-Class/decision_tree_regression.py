@@ -9,7 +9,7 @@ spark = SparkSession.builder \
     .appName("DecisionTreeRegressionExample") \
     .getOrCreate()
 
-data = spark.read.csv("C:\\Users\\ADMIN\\Documents\\Data_Big\\10_Reg-Class\\fb_live_thailand.csv", header=True, inferSchema=True)
+data = spark.read.csv("fb_live_thailand.csv", header=True, inferSchema=True)
 
 indexer_reactions = StringIndexer(inputCol="num_reactions", outputCol="num_reactions_ind")
 indexer_loves = StringIndexer(inputCol="num_loves", outputCol="num_loves_ind")

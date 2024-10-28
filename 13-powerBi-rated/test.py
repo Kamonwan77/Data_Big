@@ -9,7 +9,7 @@ from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 spark = SparkSession.builder.appName("TextAnalytics").getOrCreate()
 
 # Read data from file (replace 'reviews_rated.csv' with your actual file)
-data = spark.read.csv("C:\\Users\\ADMIN\\Documents\\Data_Big\\13-powerBi-rated\\reviews_rated.csv", header=True, inferSchema=True)
+data = spark.read.csv("reviews_rated.csv", header=True, inferSchema=True)
 
 # Select Review Text and Rating columns, trim Review Text, and cast Rating to IntegerType
 data = data.select(data["Review Text"].alias("review_text"), data["Rating"].cast(IntegerType()).alias("rating"))

@@ -13,13 +13,14 @@ data = spark.read.csv("groceries_data.csv", header=True, inferSchema=True)
 grouped_data = data.groupBy("Member_number").agg(collect_list("itemDescription").alias("Items"))
 
 # Step 4: Add a column 'basket' with unique items
-grouped_data = grouped_data.withColumn("basket", array_distinct(grouped_data["Items"]))
+grouped_data = grouped_data.withColumn("basket", array_distinct(col("Items")))
 
 # Step 5: Explode the Items array to separate items into rows
-exploded_data = grouped_data.select("Member_number", explode("Items").alias("item"))
+exploded_data = grouped_data.select("Member_number", explode("basket").alias("item"))
 
-# Step 6: Replace '/' with ',' in the items to separate
-separated_data = exploded_data.withColumn("item", explode(split("item", "/")))
+# Step 6: Split items where necessary (assuming '/' should be replaced with ',')
+# Note: Adjust this step based on your actual data if needed
+separated_data = exploded_data.withColumn("item", explode(split(col("item"), "/")))
 
 # Step 7: Group the separated items back into lists and ensure they are unique
 final_data = separated_data.groupBy("Member_number").agg(collect_list("item").alias("Items"))
@@ -39,7 +40,7 @@ model = fp.fit(final_data)
 model.freqItemsets.show(10)
 
 # Step 12: Filter association rules based on confidence
-filtered_rules = model.associationRules.filter(model.associationRules.confidence > 0.4)
+filtered_rules = model.associationRules.filter(col("confidence") > 0.4)
 
 # Step 13: Show filtered rules
 filtered_rules.show(truncate=False)

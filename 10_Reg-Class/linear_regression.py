@@ -15,7 +15,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # Load data file into DataFrame
-data = spark.read.csv('C:\\Users\\ADMIN\\Documents\\Data_Big\\10_Reg-Class\\fb_live_thailand.csv', header=True, inferSchema=True)
+data = spark.read.csv('fb_live_thailand.csv', header=True, inferSchema=True)
 data.show()
 
 # Use VectorAssembler to create vector of 'num_reactions' and 'num_loves'
